@@ -8,7 +8,7 @@ ENV ADDITIONAL_OPTS=${ADDITIONAL_OPTS}
 
 WORKDIR /opt/spring_boot
 
-COPY /target/snowman-api*.jar snowman-api.jar
+COPY /target/snowman*.jar snowman-api.jar
 
 SHELL ["/bin/sh", "-c"]
 
