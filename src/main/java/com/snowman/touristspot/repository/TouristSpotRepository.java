@@ -10,7 +10,6 @@ import com.snowman.touristspot.model.TouristSpot;
 
 public interface TouristSpotRepository extends JpaRepository<TouristSpot, Long> {
 
-	public Page<TouristSpot> findByNameContainingOrderByNameAsc(String name, Pageable pageable);
-	public Optional<TouristSpot> findByName(String name);
-	
+	public Page<TouristSpot> findByNameContainingIgnoreCaseOrderByNameAsc(String name, Pageable pageable);
+	public Optional<TouristSpot> findByNameIgnoreCase(String name);
 }

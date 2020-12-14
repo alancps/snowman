@@ -64,7 +64,7 @@ public class PictureTouristSpotResource {
 	}
 	
 	@GetMapping("/touristspot/{id}")
-	@ApiOperation(value = "Get Picture by Id.")
+	@ApiOperation(value = "Get Pictures from a tourist spot.")
 	public ResponseEntity<List<PictureTouristSpotResponse>> findByTouristicSpot(@PathVariable Long id) {
 		List<PictureTouristSpot> pictureTouristSpot = pictureTouristSpotRepository.findByTouristSpotId(id);
 		if(pictureTouristSpot.isEmpty()) {

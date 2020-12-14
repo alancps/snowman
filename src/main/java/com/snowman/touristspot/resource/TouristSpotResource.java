@@ -3,10 +3,12 @@ package com.snowman.touristspot.resource;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +24,6 @@ import com.snowman.touristspot.dto.response.TouristSpotResponse;
 import com.snowman.touristspot.event.ResourceCreatedEvent;
 import com.snowman.touristspot.mapper.TouristSpotMapper;
 import com.snowman.touristspot.model.TouristSpot;
-import com.snowman.touristspot.repository.TouristSpotRepository;
 import com.snowman.touristspot.service.TouristSpotService;
 
 import io.swagger.annotations.Api;
@@ -34,9 +35,6 @@ import io.swagger.annotations.ApiOperation;
 public class TouristSpotResource {
 
 	@Autowired
-	private TouristSpotRepository touristSpotRepository;
-
-	@Autowired
 	private TouristSpotService touristSpotService;
 
 	@Autowired
@@ -45,7 +43,7 @@ public class TouristSpotResource {
 	@PostMapping
 	@ApiOperation(value = "Register a tourist spot.")
 	public ResponseEntity<TouristSpotResponse> create(@Valid @RequestBody TouristSpotRequest touristSpotRequest, HttpServletResponse response) {
-		TouristSpot touristSpotSaved = touristSpotService.salvar(touristSpotRequest);
+		TouristSpot touristSpotSaved = touristSpotService.save(touristSpotRequest);
 		publisher.publishEvent(new ResourceCreatedEvent(this, response, touristSpotSaved.getId()));
 		return ResponseEntity.status(HttpStatus.CREATED).body(TouristSpotMapper.INSTANCE.toTouristSpotResponse(touristSpotSaved));
 	}
@@ -59,10 +57,10 @@ public class TouristSpotResource {
 
 	@GetMapping
 	@ApiOperation(value = "See a list of tourist spots.")
-	public ResponseEntity<Page<TouristSpotResponse>> search(@RequestParam(required = false, defaultValue = "%") String name, 
+	public ResponseEntity<Page<TouristSpotResponse>> search(@RequestParam(required = false) String name, 
 			@RequestParam("pageNumber") int pageNumber, 
             @RequestParam("pageSize") int pageSize) {
-		PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
+		PageRequest pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("name").descending());
 		Page<TouristSpotResponse> listPageble = touristSpotService.getListPageble(name, pageRequest);
 		
 		if(listPageble.isEmpty()) {
@@ -70,31 +68,6 @@ public class TouristSpotResource {
 		}
 		
 		return ResponseEntity.ok(listPageble);
-	}
-
-	private double distance(double lat1, double lat2, double lon1, double lon2) {
-
-		// The math module contains a function 
-		// named toRadians which converts from 
-		// degrees to radians. 
-		lon1 = Math.toRadians(lon1);
-		lon2 = Math.toRadians(lon2);
-		lat1 = Math.toRadians(lat1);
-		lat2 = Math.toRadians(lat2);
-
-		// Haversine formula  
-		double dlon = lon2 - lon1;
-		double dlat = lat2 - lat1;
-		double a = Math.pow(Math.sin(dlat / 2), 2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin(dlon / 2), 2);
-
-		double c = 2 * Math.asin(Math.sqrt(a));
-
-		// Radius of earth in kilometers. Use 3956  
-		// for miles 
-		double r = 6371;
-
-		// calculate the result 
-		return (c * r);
 	}
 
 }

@@ -103,7 +103,7 @@ public class SnowmanExceptionHandler extends ResponseEntityExceptionHandler {
 	
 	@ExceptionHandler({BadRequestException.class })
 	public ResponseEntity<Object> handlePessoaInexistenteOuInativaException(BadRequestException ex) {
-		String userMsg = messageSource.getMessage(ex.getMessage(), null, LocaleContextHolder.getLocale());
+		String userMsg = ex.getMessage();
 		String devMsg = ex.toString();
 		List<Erro> erros = Arrays.asList(new Erro(userMsg, devMsg));
 		return ResponseEntity.badRequest().body(erros);

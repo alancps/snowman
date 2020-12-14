@@ -2,6 +2,7 @@ package com.snowman.touristspot.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +33,10 @@ public class FavoriteTouristSpotService {
 	public FavoriteTouristSpot save(Long touristSpotId, HttpServletRequest request) {
 		Long userIdFromToken = getUserIdFromRequestToken(request);
 		FavoriteTouristSpotId id = new FavoriteTouristSpotId(userIdFromToken, touristSpotId);
-		favoriteTouristSpotRepository.findById(id).orElseThrow(()->new BadRequestException("Favorite Duplicated"));
+		Optional<FavoriteTouristSpot> findById = favoriteTouristSpotRepository.findById(id);
+		if(findById.isPresent()) {
+			throw new BadRequestException("Favorite Duplicate");
+		}
 		FavoriteTouristSpot favoriteTouristSpot = new FavoriteTouristSpot();
 		favoriteTouristSpot.setId(id);
 		return favoriteTouristSpotRepository.save(favoriteTouristSpot);
