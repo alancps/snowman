@@ -1,20 +1,23 @@
 version: '3.8'
+networks:
+  production-network:
+    driver: bridge
 services:
-  flyway:
-    image: flyway/flyway
-    command: -url=jdbc:mysql://db -schemas=snowman -user=root -password=root -connectRetries=60 migrate
-    volumes:
-      - .:/flyway/sql
-    depends_on:
-      - db
   db:
     image: mysql:5.7
+    container_name: db
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=snowman
     ports:
       - 3306:3306
     command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 5s
+      retries: 10
+    networks:
+      - production-network
     #volumes:
      # - ./docker/volume_mysql:/var/lib/mysql
 
@@ -23,9 +26,13 @@ services:
       context: ./
       dockerfile: ./Dockerfile
     image: alancps/snowman
+    container_name: snowman_backend
     depends_on:
-      - flyway
+      db:
+        condition: service_healthy
     ports:
-      - 8081:8081
+      - 8080:8080
     environment:
-      - PROFILE=container
+      - "SPRING_PROFILES_ACTIVE=container"
+    networks:
+      - production-network
